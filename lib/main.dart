@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:speech_recognition/speech_recognition.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 void main() => runApp(MyApp());
 
@@ -966,12 +965,6 @@ class _VoiceHomeState extends State<VoiceHome> {
     _speechRecognition.activate().then(
           (result) => setState(() => _isAvailable = result),
         );
-
-    /*_speechRecognition.listen(locale:_currentLocale).then((result)=> print('result : $result'));
-
-    _speechRecognition.cancel();
-
-    _speechRecognition.stop();*/
   }
 
   Color hexToColor(String code) {
