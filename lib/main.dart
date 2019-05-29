@@ -998,7 +998,7 @@ class _VoiceHomeState extends State<VoiceHome> {
                 paletteType: PaletteType.hsv,
               ),
               Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     FlatButton(
                         onPressed: () {
@@ -1064,16 +1064,13 @@ class _VoiceHomeState extends State<VoiceHome> {
                         onPressed: () {},
                         color: Colors.red,
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: MainAxisSize.max,
                           children: <Widget>[
-                            Text(
-                              "Aanpassen ",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22.0,
-                              ),
+                            Icon(
+                              Icons.cached,
+                              color: Colors.white,
+                              size: 32.0,
                             ),
-                            Icon(Icons.cached, color: Colors.white),
                           ],
                         )),
                   ]),
