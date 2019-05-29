@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:speech_recognition/speech_recognition.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() => runApp(MyApp());
 
@@ -907,7 +909,7 @@ class _VoiceHomeState extends State<VoiceHome> {
     initSpeechRecognition();
   }
 
-  String seekCommando() {
+  int seekCommando() {
     List<String> singleDigits = [
       'één',
       'twee',
@@ -928,7 +930,7 @@ class _VoiceHomeState extends State<VoiceHome> {
           if (singleDigits.contains(value)) {
             value = (singleDigits.indexOf(value) + 1).toString();
           }
-          return value;
+          return (isNumeric(value)) ? int.parse(value) : -1;
         }
       }
     }
@@ -974,6 +976,35 @@ class _VoiceHomeState extends State<VoiceHome> {
 
   Color hexToColor(String code) {
     return Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
+  }
+
+  String hex2RGB(String hexStr) {
+    hexStr = hexStr.replaceAll(
+        RegExp('[^0-9A-Fa-f]'), ''); // Gets a proper hex string
+    Map<String, int> rgbArray = Map<String, int>();
+
+    if (hexStr.length == 6) {
+      //If a proper hex code, convert using bitwise operation. No overhead... faster
+      var colorVal = int.parse(hexStr, radix: 16);
+      rgbArray['red'] = 0xFF & (colorVal >> 0x10);
+      rgbArray['green'] = 0xFF & (colorVal >> 0x8);
+      rgbArray['blue'] = 0xFF & colorVal;
+    }
+
+    return rgbArray['red'].toString() +
+        '/' +
+        rgbArray['green'].toString() +
+        '/' +
+        rgbArray['blue'].toString();
+  }
+
+  void sendToDevice(String value) async {
+    String url = 'http://192.168.1.15:80/echo';
+    var response = await http.post(url, body: value, headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    });
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
 
   @override
@@ -1061,7 +1092,14 @@ class _VoiceHomeState extends State<VoiceHome> {
                           ],
                         )),
                     FlatButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          String rgb = currentColor.red.toString() +
+                              '/' +
+                              currentColor.green.toString() +
+                              '/' +
+                              currentColor.blue.toString();
+                          sendToDevice(rgb);
+                        },
                         color: Colors.red,
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
@@ -1201,10 +1239,16 @@ class _VoiceHomeState extends State<VoiceHome> {
                               _speechRecognition.stop().then((result) =>
                                   setState(() => _isListening = result));
 
-                              var value = seekCommando();
+                              int value = seekCommando();
+                              int i = 0;
 
-                              if (isNumeric(value)) {
-                                print('Value: $value');
+                              for (final hexValue in hex) {
+                                if (i == value) {
+                                  String rgb = hex2RGB(hexValue);
+                                  sendToDevice(rgb);
+                                  break;
+                                }
+                                i++;
                               }
                             }
                           },
